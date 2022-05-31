@@ -95,13 +95,13 @@ def register():
             flash('Address must be greater than 2 character.', category='error')       
         else:
             # if all inputs are right -> start creating the account    
-            sql = "INSERT INTO mydatabase (user_name,email,password,ssn,address,id) VALUES (%s, %s, %s,%s,%s,%s)"
+            sql = "INSERT INTO admin (user_name,email,password,ssn,address,id) VALUES (%s, %s, %s,%s,%s,%s)"
             # Add new admin
             val = (user_name,email,password,ssn,address,id)
             mycursor.execute(sql, val)
             # commit the changes in database
             mydb.commit()
-            flash('Account successfully created', category='success')
+            #flash('Account successfully created', category='success')
     return render_template('register.html')
 
 
