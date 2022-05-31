@@ -33,12 +33,34 @@
         </table>
         <div class="left-button">
         <button> <a href="{{ url_for('add_patient') }}">Add patient</a><br></button><br>
-      </div>
-      <div class="right-button">
+        </div>
+        <div class="right-button">
         <button> <a href="{{ url_for('add_doctor') }}">Add doctor</a><br></button>
+        </div>
+        <form>
+          <div>
+            <button formmethod="get" type="submit" formaction="{{ url_for('edit_doctor') }}">
+                        Edit Dr
+            </button>
+
+            <button formmethod="post" type="submit" formaction="{{ url_for('delete_doctor') }}">
+                        Delete Dr
+            </button>
+          </div>
+        </form>
+        <form >
+            <div>
+               <button formmethod="get" type="submit" formaction="{{ url_for('edit_patient') }}">
+                        Edit Patient
+               </button>
+
+            <button formmethod="post" type="submit" formaction="{{ url_for('delete_patient') }}">
+                        Delete Patient
+            </button>
+           </div>
+        </form>
       </div>
-      </div>
-  
+
     <div class="right">
       <div class="right-top">
         <button id="patient" class="btn" name="patient" onclick="patient()">patient</button>
@@ -70,11 +92,11 @@
                 </tr>
                  {% endfor %}
               </tbody>
-            </thead>
-					</form>
+            </table>
+          </form>
+
           <form id="doctor-form">
-           
-               <table class="table1">
+              <table class="table1">
       <thead>
         <tr>
           <th>User</th>
@@ -97,11 +119,9 @@
         </tr>
          {% endfor %}
       </tbody>
-    </thead>
-					</form> 
-        </div>
-      </div>   
-        </div>
+              </table>
+          </form>
+
 
 <script>
 		var x = document.getElementById("patient-form");

@@ -1,9 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, session,flash
+from flask import Flask, render_template, request, redirect, url_for, session ,flash
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re
 import mysql.connector
-
 
 ##################################### Connecting to the database ####################################################
 mydb = mysql.connector.connect(
@@ -16,8 +15,10 @@ mycursor = mydb.cursor()
 
 ##################################### Defining the Program ####################################################  
 app = Flask(__name__)
+app.secret_key = "super secret key"
 mysql = MySQL(app)
-  
+# app.config["SESSION_PERMANENT"] = False
+# app.config["SESSION_TYPE"] = "filesystem"
 ##################################### The Main Page ####################################################
 @app.route('/')
 def main():
@@ -37,6 +38,7 @@ def login():
         #print(type(idd))
         #print(idd[0])
         if (idd[0] == str(3)):
+            session["p_id"] = idd
             mycursor.execute("SELECT id,password FROM patient")
             account = mycursor.fetchall()
             for x in account:
@@ -45,6 +47,7 @@ def login():
                     return redirect(url_for("patient"))
             # return render_template("login.html")
         elif (idd[0] == str(2)):
+            session["d_id"] = idd
             mycursor.execute("SELECT id,password FROM doctor")
             account = mycursor.fetchall()
             for x in account:
@@ -54,6 +57,7 @@ def login():
             # return render_template("login.html")
         elif (idd[0] == str(1)):
             #print("True")
+            session["a_id"] = idd
             mycursor.execute("SELECT id,password FROM admin")
             account = mycursor.fetchall()
             #print(account)
@@ -61,7 +65,7 @@ def login():
                 if (str(x[0]) == idd and x[1] == password):
                     #print("TRUE")
                     return redirect(url_for("admin"))
-        print("False")
+        #print("False")
     else:
       return render_template('login.html')
 
@@ -161,6 +165,78 @@ def add_patient():
 
     else:
         return render_template("add_patient.html")
+#############################################  Delete Doctor #################################################
+@app.route('/delete_doctor' , methods = ['GET', 'POST'])
+def delete_doctor():
+    if request.method == 'POST' and 'id' in request.form :
+        id = int(request.form['id'])
+        mycursor.execute("DELETE FROM doctor WHERE id = %s",(id,))
+        mydb.commit()
+        return render_template('delete_doctor.html')
+
+    else :
+        return render_template('delete_doctor.html')
+###########################################  Delete Patient ################################################
+@app.route('/delete_patient' , methods = ['GET', 'POST'])
+def delete_patient():
+    if request.method == 'POST' and 'id' in request.form :
+        id = request.form['id']
+        mycursor.execute("DELETE FROM patient WHERE id = %s", (id,))
+        mydb.commit()
+        return render_template('delete_patient.html')
+
+    else :
+        return render_template('delete_patient.html')
+##############################################  Edit Dr #####################################################
+@app.route('/edit_patient' , methods = ['GET', 'POST'])
+def edit_patient():
+    mycursor = mydb.cursor()
+    p_id = session["p_id"]
+    if request.method == 'GET':
+        mycursor.execute("SELECT * FROM patient WHERE id = %s" , (p_id,))
+        result = mycursor.fetchone()
+        row_headers = [x[1] for x in mycursor.description]
+        print(row_headers)
+        print(result[0])
+        return render_template('edit_patient.html',result=result)
+    elif request.method =='POST':
+        user_name = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        #ssn = request.form['ssn']
+        address = request.form['address']
+        #id = request.form['id']
+        mycursor.execute("UPDATE patient SET user_name = %s, email = %s, password = %s, address = %s  WHERE id = %s" ,
+        (user_name, email, password, address, p_id))
+        mydb.commit()
+        return redirect(url_for("admin"))
+
+########################################### Edit Doctor ######################################################
+
+@app.route('/edit_doctor' , methods = ['GET', 'POST'])
+def edit_doctor():
+    mycursor = mydb.cursor()
+    d_id = session["d_id"]
+    if request.method == 'GET':
+        mycursor.execute("SELECT * FROM doctor WHERE id = %s", (d_id,))
+        result = mycursor.fetchone()
+        row_headers = [x[1] for x in mycursor.description]
+        #print(row_headers)
+        # print(result[0])
+        return render_template('edit_doctor.html', result=result)
+    elif request.method == 'POST':
+        user_name = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        # ssn = request.form['ssn']
+        address = request.form['address']
+        # id = request.form['id']
+        mycursor.execute(
+            "UPDATE doctor SET user_name = %s, email = %s, password = %s, address = %s  WHERE id = %s",
+            (user_name, email, password, address, d_id))
+        mydb.commit()
+        return redirect(url_for("admin"))
+
 
 ########################################### Doctors Page ########################################################
 @app.route( '/doctor' , methods=['GET','POST'])
@@ -190,6 +266,7 @@ def about():
 def contact():
 
     return render_template('contactus.html')
+
 
 
 ####################################### Starting the website ##################################################33
